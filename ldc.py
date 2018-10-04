@@ -50,25 +50,29 @@ def apply_sbox(text):
 
 
 def permute(original, permutation):
+    print(len(original))
     return [original[i] for i in permutation]
 
 
 def generate_plaintext():
     # Generate 10 000 16-bit plaintext values
     plaintext = {}
-    for i in range(0, 10000):
+    for i in range(0, 10):
         plaintext[str(i).zfill(16)] = ""
     return plaintext
 
 
 def encrypt(key):
-    plaintext_cipher_map = generate_plaintext()
+    plaintext_cipher = generate_plaintext()
 
-    for plain, cipher in plaintext_cipher_map.items():
-        for i in range(0,4):
-            cipher = str(int(convert_binary(plain)) ^ int(convert_binary(key)))
-            cipher = apply_sbox(cipher)
-            cipher = permute(cipher, perm)
+    for plain in plaintext_cipher:
+        # Initial XOR
+        plaintext_cipher[plain] = str(int(plain, 16) ^ int(key, 16)).zfill(16)
+        for i in range(0,3):
+            print(plaintext_cipher[plain])
+            plaintext_cipher[plain] = apply_sbox(plaintext_cipher[plain])
+            plaintext_cipher[plain] = ''.join(permute(plaintext_cipher[plain], perm))
+            plaintext_cipher[plain] = str(int(plaintext_cipher[plain], 16) ^ int(key, 16)).zfill(16)
 
-    return plaintext_cipher_map
+    return plaintext_cipher
 
