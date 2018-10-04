@@ -2,8 +2,6 @@
 # 7745112
 # CSI4108 Assignment 2 Question 2
 
-import random
-
 s_box = {'0':'E',
          '1':'4',
          '2':'D',
@@ -67,12 +65,12 @@ def encrypt(key):
 
     for plain in plaintext_cipher:
         # Initial XOR
-        plaintext_cipher[plain] = str(int(plain, 16) ^ int(key, 16)).zfill(16)
+        print(format((int(plain, 16)) ^ (int(key, 16)), 'X'))
+        plaintext_cipher[plain] = format((int(plain, 16)) ^ (int(key, 16)), 'X')
         for i in range(0,3):
-            print(plaintext_cipher[plain])
             plaintext_cipher[plain] = apply_sbox(plaintext_cipher[plain])
             plaintext_cipher[plain] = ''.join(permute(plaintext_cipher[plain], perm))
-            plaintext_cipher[plain] = str(int(plaintext_cipher[plain], 16) ^ int(key, 16)).zfill(16)
+            plaintext_cipher[plain] = format((int(plain, 16)) ^ (int(key, 16)), 'X') #str(int(plaintext_cipher[plain], 16) ^ int(key, 16)).zfill(16)
 
     return plaintext_cipher
 
