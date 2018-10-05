@@ -1,6 +1,10 @@
 # Justin Huynh
 # 7745112
 # CSI4108 Assignment 2 Question 2
+import csv
+
+# key = "FE51"
+key = "FA5A"
 
 s_box = {'0': 'E',
          '1': '4',
@@ -69,8 +73,16 @@ def encrypt(key):
             plaintext_cipher[plain] = apply_sbox(plaintext_cipher[plain])
             print("AFTER SBOX: " + plaintext_cipher[plain])
             plaintext_cipher[plain] = ''.join(permute(convert_binary(plaintext_cipher[plain]), perm))
+            plaintext_cipher[plain] = format(int(plaintext_cipher[plain], 2), 'X')
             print("AFTER PERMUTE: " + plaintext_cipher[plain])
-            plaintext_cipher[plain] = format((int(plaintext_cipher[plain], 16)) ^ (int(key, 16)), 'X')
-            print("AFTER KEY XOR: " + plaintext_cipher[plain])
+            plaintext_cipher[plain] = format((int(plaintext_cipher[plain], 16)) ^ (int(key, 16)), 'X').zfill(4)
+            print("AFTER XOR: " + plaintext_cipher[plain])
     return plaintext_cipher
+
+
+def output():
+    plain_cipher = encrypt(key)
+    w = csv.writer(open("out.csv", "w"))
+    for plain, cipher in plain_cipher.items():
+        w.writerow([plain, cipher])
 
