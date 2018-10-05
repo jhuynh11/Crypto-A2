@@ -70,7 +70,7 @@ def encrypt(key):
         for i in range(0,3):
             plaintext_cipher[plain] = apply_sbox(plaintext_cipher[plain])
             plaintext_cipher[plain] = ''.join(permute(plaintext_cipher[plain], perm))
-            plaintext_cipher[plain] = format((int(plain, 16)) ^ (int(key, 16)), 'X') #str(int(plaintext_cipher[plain], 16) ^ int(key, 16)).zfill(16)
+            plaintext_cipher[plain] = format((int(plaintext_cipher[plain], 16)) ^ (int(key, 16)), 'X')
 
     return plaintext_cipher
 
