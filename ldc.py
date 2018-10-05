@@ -2,34 +2,34 @@
 # 7745112
 # CSI4108 Assignment 2 Question 2
 
-s_box = {'0':'E',
-         '1':'4',
-         '2':'D',
-         '3':'1',
-         '4':'2',
-         '5':'F',
-         '6':'B',
-         '7':'8',
-         '8':'3',
-         '9':'A',
-         'A':'6',
-         'B':'C',
-         'C':'5',
-         'D':'9',
-         'E':'0',
-         'F':'7'
+s_box = {'0': 'E',
+         '1': '4',
+         '2': 'D',
+         '3': '1',
+         '4': '2',
+         '5': 'F',
+         '6': 'B',
+         '7': '8',
+         '8': '3',
+         '9': 'A',
+         'A': '6',
+         'B': 'C',
+         'C': '5',
+         'D': '9',
+         'E': '0',
+         'F': '7'
          }
 
 
 perm = [0, 4, 8, 12,
-       1, 5, 9, 13,
-       2, 6, 10, 14,
-       3, 7, 11, 15]
+        1, 5, 9, 13,
+        2, 6, 10, 14,
+        3, 7, 11, 15]
 
 
 def convert_binary(hex_key):
     scale = 16  # Hex
-    num_of_bits = 16
+    num_of_bits = 4
     binary_string = ""
     count = 1
 
@@ -48,7 +48,6 @@ def apply_sbox(text):
 
 
 def permute(original, permutation):
-    print(len(original))
     return [original[i] for i in permutation]
 
 
@@ -65,12 +64,13 @@ def encrypt(key):
 
     for plain in plaintext_cipher:
         # Initial XOR
-        print(format((int(plain, 16)) ^ (int(key, 16)), 'X'))
         plaintext_cipher[plain] = format((int(plain, 16)) ^ (int(key, 16)), 'X')
-        for i in range(0,3):
+        for i in range(0, 4):
             plaintext_cipher[plain] = apply_sbox(plaintext_cipher[plain])
-            plaintext_cipher[plain] = ''.join(permute(plaintext_cipher[plain], perm))
+            print("AFTER SBOX: " + plaintext_cipher[plain])
+            plaintext_cipher[plain] = ''.join(permute(convert_binary(plaintext_cipher[plain]), perm))
+            print("AFTER PERMUTE: " + plaintext_cipher[plain])
             plaintext_cipher[plain] = format((int(plaintext_cipher[plain], 16)) ^ (int(key, 16)), 'X')
-
+            print("AFTER KEY XOR: " + plaintext_cipher[plain])
     return plaintext_cipher
 
