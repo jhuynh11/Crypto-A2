@@ -2,8 +2,8 @@
 # 7745112
 # CSI4108 Assignment 2 Question 2
 import csv
+import pandas as pd
 
-# key = "FE51"
 key = "FA5A"
 
 s_box = {'0': 'E',
@@ -41,6 +41,7 @@ def convert_binary(hex_key):
         i = bin(int(hex_char, scale))[2:].zfill(num_of_bits)
         binary_string += i
 
+    binary_string = binary_string.zfill(16) # Add this?
     return binary_string
 
 
@@ -58,12 +59,21 @@ def permute(original, permutation):
 def generate_plaintext():
     # Generate 10 000 16-bit plaintext values
     plaintext = {}
-    for i in range(0, 10):
-        plaintext[str(i).zfill(16)] = ""
+    for i in range(0, 10000):
+        plaintext[str(i)] = ""
+        # plaintext[str(i).zfill(16)] = ""
     return plaintext
 
 
 def encrypt(key):
+    """
+    Encrypts 10 000 plaintext to cipher text values. This algorithm has 4 rounds of:
+    A) Key Mixing
+    B) S-Box substitution
+    C) Permutation
+    :param key: 16 bit hex key used to encrypt plaintext
+    :return: Dictionary of 10 000 plaintext cipher text pairs
+    """
     plaintext_cipher = generate_plaintext()
 
     for plain in plaintext_cipher:
@@ -71,18 +81,49 @@ def encrypt(key):
         plaintext_cipher[plain] = format((int(plain, 16)) ^ (int(key, 16)), 'X')
         for i in range(0, 4):
             plaintext_cipher[plain] = apply_sbox(plaintext_cipher[plain])
-            print("AFTER SBOX: " + plaintext_cipher[plain])
             plaintext_cipher[plain] = ''.join(permute(convert_binary(plaintext_cipher[plain]), perm))
             plaintext_cipher[plain] = format(int(plaintext_cipher[plain], 2), 'X')
-            print("AFTER PERMUTE: " + plaintext_cipher[plain])
             plaintext_cipher[plain] = format((int(plaintext_cipher[plain], 16)) ^ (int(key, 16)), 'X').zfill(4)
-            print("AFTER XOR: " + plaintext_cipher[plain])
     return plaintext_cipher
 
 
-def output():
+def output_plain_cipher_pairs():
     plain_cipher = encrypt(key)
-    w = csv.writer(open("out.csv", "w"))
+    w = csv.writer(open("out_hex.csv", "w"))
     for plain, cipher in plain_cipher.items():
         w.writerow([plain, cipher])
+
+
+def attack():
+    plain_cipher_hex = encrypt(key)
+    plain_cipher_bin = {}
+    d = {'partial_subkey':[], 'count': [], 'bias':[]}
+
+    # Convert the plaintext cipher pairs into binary
+    for plain, cipher in plain_cipher_hex.items():
+        plain_cipher_bin[convert_binary(plain)] = convert_binary(cipher)
+
+    # Test 256 Partial Subkeys
+    for i in range(0, 256):
+        count = 0
+        for plain, cipher in plain_cipher_bin.items():
+            u46 = 1
+            u48 = 1
+            u414 = 0
+            u416 = 0
+            p5 = int(plain[4])
+            p7 = int(plain[6])
+            p8 = int(plain[8])
+            if  u46 ^ u48 ^ u414 ^ u416 ^ p5 ^ p7 ^ p8 == 0:
+                count += 1
+        d['partial_subkey'].append(format(i,'X'))
+        d['count'].append(count)
+        d['bias'].append((count - 5000) / 10000)
+
+    df = pd.DataFrame(d)
+    
+    # Print the binary plaintext cipher text keys into a CSV file
+    # w = csv.writer(open("out_bin.csv", "w"))
+    # for plain, cipher in plain_cipher_bin.items():
+    #     w.writerow([plain, cipher])
 
