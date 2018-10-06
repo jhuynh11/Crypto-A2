@@ -24,6 +24,7 @@ s_box = {'0': 'E',
          'F': '7'
          }
 
+inv_s_box = {v: k for k, v in s_box.items()}  # Inverted s-box mapping
 
 perm = [0, 4, 8, 12,
         1, 5, 9, 13,
@@ -107,23 +108,45 @@ def attack():
     for i in range(0, 256):
         count = 0
         for plain, cipher in plain_cipher_bin.items():
-            u46 = 1
-            u48 = 1
-            u414 = 0
-            u416 = 0
+            u46 = int(get_U(format(i, 'X'), cipher)[5])
+            u48 = int(get_U(format(i, 'X'), cipher)[7])
+            u414 = int(get_U(format(i, 'X'), cipher)[13])
+            u416 = int(get_U(format(i, 'X'), cipher)[15])
             p5 = int(plain[4])
             p7 = int(plain[6])
             p8 = int(plain[8])
-            if  u46 ^ u48 ^ u414 ^ u416 ^ p5 ^ p7 ^ p8 == 0:
+            if u46 ^ u48 ^ u414 ^ u416 ^ p5 ^ p7 ^ p8 == 0:
                 count += 1
         d['partial_subkey'].append(format(i,'X'))
         d['count'].append(count)
-        d['bias'].append((count - 5000) / 10000)
+        d['bias'].append(abs(count - 5000) / 10000)
 
     df = pd.DataFrame(d)
-    
+
+    df.to_csv('bias.csv')
     # Print the binary plaintext cipher text keys into a CSV file
     # w = csv.writer(open("out_bin.csv", "w"))
     # for plain, cipher in plain_cipher_bin.items():
     #     w.writerow([plain, cipher])
 
+
+def get_U(subkey, cipher):
+    """
+    Needs to be done in hex to support s-box transformations.
+    :param subkey:
+    :param cipher:
+    :return:
+    """
+    # Convert cipher to hex
+    hex_cipher = hex(int(cipher, 2))
+
+    # XOR with partial subkey
+    r = format(int(subkey, 16) ^ (int(hex_cipher, 16)), 'X')
+
+    # Reverse S-Box
+    out = ""
+    for i in str(r):
+        out += inv_s_box[i]
+
+    # Return binary
+    return convert_binary(out)
